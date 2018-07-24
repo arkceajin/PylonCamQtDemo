@@ -17,6 +17,7 @@ using namespace Pylon;
 class QPylonImageEventHandler : public QObject, public CImageEventHandler
 {
     Q_OBJECT
+    friend class QPylonCamera;
 public:
     using QObject::QObject;
 
@@ -31,6 +32,7 @@ signals:
     void frameGrabbed(const QImage &frame);
 
 private:
+    static QImage resultToImage(const CGrabResultPtr& ptrGrabResult);
     static QImage toQImage(const CPylonImage &pylonImage);
 };
 
@@ -91,7 +93,6 @@ private:
     QAbstractVideoSurface*  mVideoSurface;
     CInstantCamera*         mCamera;
     QRect                   mRect;
-    QImage                  mBuffer;
 };
 #else
 //If you find the way to use Pylon with Mingw, Please contact me.

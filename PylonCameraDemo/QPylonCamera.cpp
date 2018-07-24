@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QVideoSurfaceFormat>
 #include <QGuiApplication>
+#include <QtConcurrent/QtConcurrentRun>
 
 // Namespace for using GenApi objects.
 using namespace GenApi;
@@ -10,9 +11,14 @@ void QPylonImageEventHandler::OnImageGrabbed(CInstantCamera &camera, const CGrab
 {
     Q_UNUSED(camera)
 
+    emit frameGrabbed(resultToImage(ptrGrabResult));
+}
+
+QImage QPylonImageEventHandler::resultToImage(const CGrabResultPtr &ptrGrabResult)
+{
     if(!ptrGrabResult.IsValid()) {
-        qWarning()<<"Invalid frame grabbed";
-        return;
+        qWarning()<<"Invalid frame resultToImage";
+        return QImage();
     }
 
     CImageFormatConverter fc;
@@ -23,10 +29,9 @@ void QPylonImageEventHandler::OnImageGrabbed(CInstantCamera &camera, const CGrab
     fc.Convert(pylonImage, ptrGrabResult);
     if (!pylonImage.IsValid()) {
         qWarning()<<"Can't convert grabbed result to PylonImage";
-        return;
+        return QImage();
     }
-
-    emit frameGrabbed(toQImage(pylonImage).convertToFormat(QImage::Format_RGB32));
+    return toQImage(pylonImage);
 }
 
 QImage QPylonImageEventHandler::toQImage(const CPylonImage &pylonImage)
@@ -38,7 +43,7 @@ QImage QPylonImageEventHandler::toQImage(const CPylonImage &pylonImage)
 
     return QImage(static_cast<const uchar*>(buffer),
                   width, height, step,
-                  QImage::Format_RGB888).copy();
+                  QImage::Format_RGB888).copy().convertToFormat(QImage::Format_RGB32);
 }
 
 QPylonCamera::QPylonCamera(QObject *parent) :
@@ -148,13 +153,24 @@ void QPylonCamera::stop()
 
 void QPylonCamera::capture()
 {
-    emit captured(mBuffer);
+    if(mVideoSurface != Q_NULLPTR)
+        mCamera->StopGrabbing();
+    QtConcurrent::run([this]() {
+        try {
+            CGrabResultPtr ptrGrabResult;
+            mCamera->GrabOne(3000, ptrGrabResult);
+            emit captured(QPylonImageEventHandler::resultToImage(ptrGrabResult));
+        } catch(const GenericException &e) {
+            qWarning()<<"Capture failed: "<<e.GetDescription();
+            emit captured(QImage());
+        }
+    });
+    if(mVideoSurface != Q_NULLPTR)
+        mCamera->StartGrabbing(GrabStrategy_OneByOne, GrabLoop_ProvidedByInstantCamera);
 }
 
 void QPylonCamera::renderFrame(const QImage &frame)
 {
-    mBuffer = frame;
-
     if (!mVideoSurface)
         return;
 
