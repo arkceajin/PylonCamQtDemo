@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QAbstractVideoSurface>
 
-#if _MSC_VER
+// So long as libs are linked, everything below is agnostic with respect to MSVC or NVIDIA's ARM compilers (e.g. GCC/NVCC)
+
+#if _MSC_VER || __aarch64__
 
 #include <pylon/PylonIncludes.h>
 
