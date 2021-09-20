@@ -1,7 +1,22 @@
 QT += quick multimedia
 CONFIG += c++11
 
+# Define pylon path if not already; cannot anticipate user will ahve the env variable PYLON_DEV_DIR locked at loaded. 
+# Also, assumee it lives at /opt/pylon/; if this is not the case this will need to be updated.
+!defined(PYLON_DEV_DIR) {
+    PYLON_DEV_DIR = $$shell_path(/opt/pylon)
+}
+
 INCLUDEPATH += $$(PYLON_DEV_DIR)/include
+
+# Need to be more verbose about pylon libs with unix. 
+unix{
+    message("unix build")
+    LIBS += -L$$PYLON_DEV_DIR/lib -lpylonbase \
+            -lpylonutility \
+            -lGenApi_gcc_v3_1_Basler_pylon \
+            -lGCBase_gcc_v3_1_Basler_pylon
+}
 win32 {
     !contains(QMAKE_TARGET.arch, x86_64) {
         message("x86 build")
