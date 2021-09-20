@@ -29,7 +29,7 @@ win32 {
         LIBS += -L$$(PYLON_DEV_DIR)/lib/x64
     }
 }
-message($$(PYLON_DEV_DIR))
+message($$PYLON_DEV_DIR)
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
