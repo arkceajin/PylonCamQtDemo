@@ -1,7 +1,7 @@
 QT += quick multimedia
 CONFIG += c++11
 
-# Define pylon path if not already; cannot anticipate user will ahve the env variable PYLON_DEV_DIR locked at loaded. 
+# Define pylon path if not already; cannot anticipate user will ahve the env variable PYLON_DEV_DIR locked and loaded. 
 # Also, assumee it lives at /opt/pylon/; if this is not the case this will need to be updated.
 
 !defined(PYLON_DEV_DIR) {
