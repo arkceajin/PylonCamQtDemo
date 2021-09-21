@@ -1,7 +1,25 @@
 QT += quick multimedia
 CONFIG += c++11
 
-INCLUDEPATH += $$(PYLON_DEV_DIR)/include
+# Define pylon path if not already; cannot anticipate user will ahve the env variable PYLON_DEV_DIR locked and loaded. 
+# Also, assumee it lives at /opt/pylon/; if this is not the case this will need to be updated.
+
+!defined(PYLON_DEV_DIR) {
+    PYLON_DEV_DIR = $$shell_path(/opt/pylon)
+}
+
+# Make sure we can include pylon headers, etc.
+INCLUDEPATH +=  $$shell_path($$PYLON_DEV_DIR/include)
+
+# Need to be more verbose about pylon libs with unix. 
+unix{
+    PYLON_LIBS = $$shell_path($$PYLON_DEV_DIR/lib)
+    message("unix build")
+    LIBS += -L$$shell_path($$PYLON_DEV_DIR/lib) -lpylonbase \
+            -lpylonutility \
+            -lGenApi_gcc_v3_1_Basler_pylon \
+            -lGCBase_gcc_v3_1_Basler_pylon
+}
 win32 {
     !contains(QMAKE_TARGET.arch, x86_64) {
         message("x86 build")
@@ -11,7 +29,7 @@ win32 {
         LIBS += -L$$(PYLON_DEV_DIR)/lib/x64
     }
 }
-message($$(PYLON_DEV_DIR))
+message($$PYLON_DEV_DIR)
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings

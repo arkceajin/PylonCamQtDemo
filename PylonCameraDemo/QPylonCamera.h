@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QAbstractVideoSurface>
 
-#if _MSC_VER
+// So long as libs are linked and headers includable, everything below should be agnostic with respect system architecture. 
+
+#if _MSC_VER || __aarch64__ || __x86_64__
 
 #include <pylon/PylonIncludes.h>
 
