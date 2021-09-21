@@ -1,7 +1,7 @@
 # PylonCamQtDemo
 This is a basic Pylon camera viewer demo using `Qt/C++`.
 
-Builds on **MSVC** (Windwos),**aarch64**, and **x86** (Linux) machines. 
+Builds on **MSVC** (Windows), **aarch64**, and **x86** (Linux) machines. 
 
 If you find the way to use Pylon with **Ming**, Please contact https://github.com/arkceajin
 
